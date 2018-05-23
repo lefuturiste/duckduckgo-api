@@ -32,33 +32,31 @@ class SearchController extends Controller
 			$dom = new HTML5();
 			$dom = $dom->loadHTML($html);
 			$results = [];
-			foreach ($dom->getElementById('links')->childNodes as $element) {
-				if ($element->nodeName != "#text" && $element->childNodes->length == 3 && $element->childNodes[1]->nodeName == 'div') {
-					$title = str_replace("\n          \n          ", "",
-						str_replace("\n          \n            ", "", $element->childNodes[1]->childNodes[3]->textContent));
-					if (!empty($title)) {
-						$description = $element->childNodes[1]->childNodes[5]->textContent;
-						$url = urldecode(str_replace("/l/?kh=-1&uddg=", "", $element->childNodes[1]->childNodes[5]->getAttribute('href')));
-						$urlFormated = urldecode(str_replace("\n                  ", "", $element->childNodes[1]->childNodes[7]->childNodes[1]->childNodes[3]->textContent));
-						$icon = str_replace('//', 'https://', $element->childNodes[1]->childNodes[7]->childNodes[1]->childNodes[1]->childNodes[1]->childNodes[1]->getAttribute('src'));
-						array_push($results, [
-							'title' => $title,
-							'description' => $description,
-							'url' => $url,
-							'url_truncated' => $urlFormated,
-							'icon' => $icon
-						]);
+			if ($dom->documentURI != null){
+				foreach ($dom->getElementById('links')->childNodes as $element) {
+					if ($element->nodeName != "#text" && $element->childNodes->length == 3 && $element->childNodes[1]->nodeName == 'div') {
+						$title = str_replace("\n          \n          ", "",
+							str_replace("\n          \n            ", "", $element->childNodes[1]->childNodes[3]->textContent));
+						if (!empty($title)) {
+							$description = $element->childNodes[1]->childNodes[5]->textContent;
+							$url = urldecode(str_replace("/l/?kh=-1&uddg=", "", $element->childNodes[1]->childNodes[5]->getAttribute('href')));
+							$urlFormated = urldecode(str_replace("\n                  ", "", $element->childNodes[1]->childNodes[7]->childNodes[1]->childNodes[3]->textContent));
+							$icon = str_replace('//', 'https://', $element->childNodes[1]->childNodes[7]->childNodes[1]->childNodes[1]->childNodes[1]->childNodes[1]->getAttribute('src'));
+							array_push($results, [
+								'title' => $title,
+								'description' => $description,
+								'url' => $url,
+								'url_truncated' => $urlFormated,
+								'icon' => $icon
+							]);
+						}
 					}
 				}
 			}
 
 			try{
-				$instantAnswersResponse = $client->get("https://api.duckduckgo.com/?q={$validator->getValue('query')}&format=json&atb=v114-2");
+				$instantAnswersResponse = $client->get("https://api.duckduckgo.com/?q={$validator->getValue('query')}&format=json&no_redirect=1");
 				$instantAnswers = json_decode($instantAnswersResponse->getBody()->getContents(), 1);
-//				foreach ($instantAnswers as $key => $value){
-//					unset($instantAnswers[$key]);
-//					$instantAnswers[strtolower($key)] = $value;
-//				}
 			}catch (\Exception $e){
 				return $response->withJson([
 					'success' => false,
