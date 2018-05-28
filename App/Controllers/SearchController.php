@@ -16,23 +16,29 @@ class SearchController extends Controller
 		$validator->required('query');
 		$validator->notEmpty('query');
 		if ($validator->isValid()) {
+			$results = [];
 			try {
 				$duckduckgoResponse = $client->get("https://duckduckgo.com/html/?q={$validator->getValue('query')}");
 			} catch (\Exception $exception) {
-
-				return $response->withJson([
+				$duckduckgoResponse = [];
+				$results = [
 					'success' => false,
-					'errors' => [
-						'Error while requesting duckduckgo api'
-					]
-				]);
+					'error' => [
+						'message' => 'Err while requesting duckduckgo api',
+						'code' => $exception->getCode()
+				]];
 			}
+			
+			if ($duckduckgoResponse != []){
 
 			$html = str_replace("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">", "<!DOCTYPE html>", $duckduckgoResponse->getBody()->getContents());
 			$dom = new HTML5();
 			$dom = $dom->loadHTML($html);
-			$results = [];
-			if ($dom->documentURI != null){
+			$cond = $dom->getElementsByTagName('title')[0]->textContent;
+			}else{
+			$cond = "";
+			}
+			if($cond == $validator->getValue('query') . " at DuckDuckGo"){
 				foreach ($dom->getElementById('links')->childNodes as $element) {
 					if ($element->nodeName != "#text" && $element->childNodes->length == 3 && $element->childNodes[1]->nodeName == 'div') {
 						$title = str_replace("\n          \n          ", "",
