@@ -2,19 +2,20 @@
 
 [![Duckduckgo api](https://duckduckgo.com/assets/logo_homepage.normal.v107.svg)](https://duckduckgo.com)
 
-Host your own duckduckgo api
+Host your own duckduckgo api, support bang search and instant awnsers
 
 ## Quick install
 
-Just run a:
-
-`composer create-project lefuturiste/duckduckgo-api`
+- Just git clone this repo
+- `composer install`
 
 Create a .env file in the root directory and fill it with env vars fields (you can get the list of the fields in .env.example)
 
 ## Usage
 
 The simplest usage : `GET /search?query=whatever` , ths url will return the first page of row search result with title, description, icon and url and, with that, the instant awnser api result from duckduckgo's true api.
+
+### bang
 
 ## The console
 
